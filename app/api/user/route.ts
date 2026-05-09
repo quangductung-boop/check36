@@ -2,6 +2,8 @@
 // API Route: GET /api/user?username=xxx
 // Compatible with Cloudflare Pages Edge Runtime
 
+import { NextRequest, NextResponse } from "next/server";
+
 export const runtime = 'edge';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -79,55 +81,52 @@ const MOCK_USERS: Record<string, UserProfile> = {
   },
 };
 
-// ─── Helper: JSON response đảm bảo luôn đúng content-type ────────────────────
-function jsonResponse(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      "Content-Type": "application/json",
-      "Cache-Control": "no-store",
-    },
-  });
-}
-
 // ─── GET Handler ──────────────────────────────────────────────────────────────
-export async function GET(request: Request): Promise<Response> {
+export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const username = searchParams.get("username");
+    const username = request.nextUrl.searchParams.get("username");
 
     // Validate: thiếu username
     if (!username || username.trim().length === 0) {
-      return jsonResponse({ success: false, error: "Username is required" }, 400);
+      return NextResponse.json(
+        { success: false, error: "Username is required" },
+        { status: 400 }
+      );
     }
 
     const trimmed = username.trim();
 
     // Validate: sai format
     if (trimmed.length > 30 || !/^[a-zA-Z0-9._]+$/.test(trimmed)) {
-      return jsonResponse(
+      return NextResponse.json(
         { success: false, error: "Invalid username format. Only letters, numbers, dots and underscores allowed." },
-        400
+        { status: 400 }
       );
     }
 
-    // Lookup user — Edge Runtime safe, không dùng async/await hay setTimeout
+    // Lookup user — Edge Runtime safe
     const lower = trimmed.toLowerCase();
     const user = MOCK_USERS[lower];
 
     if (!user) {
-      return jsonResponse(
+      return NextResponse.json(
         { success: false, error: `User @${trimmed} not found` },
-        404
+        { status: 404 }
       );
     }
 
-    return jsonResponse({ success: true, data: user }, 200);
+    return NextResponse.json(
+      { success: true, data: user },
+      { status: 200 }
+    );
 
   } catch (err) {
     // Log lỗi rõ ràng để debug trên Cloudflare dashboard
     console.error("[API /api/user] Unexpected error:", err);
     const message = err instanceof Error ? err.message : "Internal server error";
-    return jsonResponse({ success: false, error: message }, 500);
+    return NextResponse.json(
+      { success: false, error: message },
+      { status: 500 }
+    );
   }
 }

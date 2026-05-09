@@ -11,7 +11,7 @@ import {
   ThumbsUp,
   TrendingUp,
 } from "lucide-react";
-import { UserProfile, formatNumber } from "@/lib/mockData";
+import { UserProfile, formatNumber } from "@/lib/userLookup";
 import UserOverviewCard from "./UserOverviewCard";
 import StatsCard from "./StatsCard";
 

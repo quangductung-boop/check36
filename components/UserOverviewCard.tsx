@@ -13,7 +13,7 @@ import {
   Heart,
   Calendar,
 } from "lucide-react";
-import { UserProfile } from "@/lib/mockData";
+import { UserProfile } from "@/lib/userLookup";
 
 interface UserOverviewCardProps {
   user: UserProfile;

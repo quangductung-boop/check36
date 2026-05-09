@@ -4,7 +4,7 @@
 import { useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Sparkles, Star } from "lucide-react";
-import { UserProfile } from "@/lib/mockData";
+import { UserProfile, lookupUser } from "@/lib/userLookup";
 import Header from "@/components/Header";
 import SearchBar from "@/components/SearchBar";
 import UserDashboard from "@/components/UserDashboard";
@@ -21,7 +21,7 @@ export default function HomePage() {
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [lastUsername, setLastUsername] = useState<string>("");
 
-  // Gọi API route nội bộ để lấy thông tin user
+  // Tra cứu user trực tiếp trên client — không cần API route, hoạt động trên mọi host
   const handleSearch = useCallback(async (username: string) => {
     setLastUsername(username);
     setAppState("loading");
@@ -29,27 +29,8 @@ export default function HomePage() {
     setErrorMsg("");
 
     try {
-      const res = await fetch(
-        `/api/user?username=${encodeURIComponent(username)}`
-      );
-
-      // Safe parse: đọc text trước, tránh crash nếu API trả HTML thay vì JSON
-      const text = await res.text();
-      let json: { success: boolean; data?: UserProfile; error?: string };
-
-      try {
-        json = JSON.parse(text);
-      } catch {
-        // API trả HTML error page (500, 502, v.v.) — không phải JSON
-        console.error("[fetch] Non-JSON response:", text.slice(0, 200));
-        throw new Error(`Server error (${res.status}). Please try again.`);
-      }
-
-      if (!res.ok || !json.success) {
-        throw new Error(json.error || "User not found");
-      }
-
-      setUserData(json.data!);
+      const user = await lookupUser(username);
+      setUserData(user);
       setAppState("success");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Something went wrong";

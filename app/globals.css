@@ -1,0 +1,72 @@
+/* app/globals.css — Global styles + Tailwind base */
+@import "tailwindcss";
+
+/* ── Custom font variable ── */
+@layer base {
+  :root {
+    --font-jakarta: "Plus Jakarta Sans", sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-jakarta), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #f8f9ff;
+  }
+
+  /* Scrollbar đẹp hơn */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #f1f0f8;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #c4b5fd;
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #a78bfa;
+  }
+
+  /* Selection color */
+  ::selection {
+    background: #ddd6fe;
+    color: #4c1d95;
+  }
+}
+
+/* ── Utility classes bổ sung ── */
+@layer utilities {
+  .font-jakarta {
+    font-family: var(--font-jakarta), system-ui, sans-serif;
+  }
+
+  /* Glassmorphism helper */
+  .glass {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+  }
+
+  /* Gradient text helper */
+  .gradient-text {
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+}

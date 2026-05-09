@@ -21,6 +21,7 @@ interface UserDashboardProps {
 
 // Tỉ lệ engagement đơn giản: likes / (followers * videos) * 100
 const calcEngagement = (user: UserProfile): string => {
+  if (user.likes === null || user.followers === null || !user.videoCount) return "N/A";
   if (!user.followers || !user.videoCount) return "N/A";
   const rate = (user.likes / (user.followers * user.videoCount)) * 100;
   return rate.toFixed(2) + "%";
@@ -28,7 +29,7 @@ const calcEngagement = (user: UserProfile): string => {
 
 // Trung bình lượt thích mỗi video
 const avgLikesPerVideo = (user: UserProfile): string => {
-  if (!user.videoCount) return "0";
+  if (!user.videoCount || user.likes === null) return "N/A";
   return formatNumber(Math.round(user.likes / user.videoCount));
 };
 
@@ -109,8 +110,8 @@ export default function UserDashboard({ user }: UserDashboardProps) {
         ))}
       </div>
 
-      {/* Digg count if available */}
-      {user.diggCount > 0 && (
+      {/* Digg count nếu có */}
+      {user.diggCount !== null && user.diggCount !== undefined && user.diggCount > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}

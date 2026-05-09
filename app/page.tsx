@@ -4,7 +4,7 @@
 import { useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Sparkles, Star } from "lucide-react";
-import { UserProfile, lookupUser } from "@/lib/userLookup";
+import type { UserProfile } from "@/lib/userLookup";
 import Header from "@/components/Header";
 import SearchBar from "@/components/SearchBar";
 import UserDashboard from "@/components/UserDashboard";
@@ -21,7 +21,7 @@ export default function HomePage() {
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [lastUsername, setLastUsername] = useState<string>("");
 
-  // Tra cứu user trực tiếp trên client — không cần API route, hoạt động trên mọi host
+  // Fetch dữ liệu thật từ API route → TikTok public profile
   const handleSearch = useCallback(async (username: string) => {
     setLastUsername(username);
     setAppState("loading");
@@ -29,8 +29,28 @@ export default function HomePage() {
     setErrorMsg("");
 
     try {
-      const user = await lookupUser(username);
-      setUserData(user);
+      const res = await fetch(
+        `/api/user?username=${encodeURIComponent(username.trim().replace(/^@/, ""))}`
+      );
+
+      // Safe parse: đọc text trước để tránh crash nếu server trả HTML thay vì JSON
+      const text = await res.text();
+      let json: { success: boolean; data?: UserProfile; error?: string };
+
+      try {
+        json = JSON.parse(text);
+      } catch {
+        console.error("[page] Non-JSON response:", text.slice(0, 300));
+        throw new Error(
+          `Server error (${res.status}). Please check Cloudflare Pages build config.`
+        );
+      }
+
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || "User not found");
+      }
+
+      setUserData(json.data!);
       setAppState("success");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Something went wrong";

@@ -3,6 +3,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Required for Cloudflare Pages via @cloudflare/next-on-pages
+  // This tells Next.js to output in a format compatible with Edge Runtime
   images: {
     unoptimized: true,
     // Cho phép load avatar từ dicebear và các CDN khác

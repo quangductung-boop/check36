@@ -32,13 +32,24 @@ export default function HomePage() {
       const res = await fetch(
         `/api/user?username=${encodeURIComponent(username)}`
       );
-      const json = await res.json();
+
+      // Safe parse: đọc text trước, tránh crash nếu API trả HTML thay vì JSON
+      const text = await res.text();
+      let json: { success: boolean; data?: UserProfile; error?: string };
+
+      try {
+        json = JSON.parse(text);
+      } catch {
+        // API trả HTML error page (500, 502, v.v.) — không phải JSON
+        console.error("[fetch] Non-JSON response:", text.slice(0, 200));
+        throw new Error(`Server error (${res.status}). Please try again.`);
+      }
 
       if (!res.ok || !json.success) {
         throw new Error(json.error || "User not found");
       }
 
-      setUserData(json.data);
+      setUserData(json.data!);
       setAppState("success");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Something went wrong";
